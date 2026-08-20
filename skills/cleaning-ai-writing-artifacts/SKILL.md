@@ -46,7 +46,18 @@ Check for suspicious invisible or control characters, especially:
 - U+FEFF ZERO WIDTH NO-BREAK SPACE/BOM
 - unexpected bidi controls in U+202A–U+202E and U+2066–U+2069
 
-Remove characters only when they are unintended. Preserve characters required for legitimate scripts, emoji sequences, or document semantics. Normalize ordinary prose to Unicode NFC after cleanup.
+For a file audit, use `scripts/audit_unicode.py` when Python is already available:
+
+```bash
+python scripts/audit_unicode.py INPUT
+python scripts/audit_unicode.py INPUT --json
+```
+
+The helper is optional and read-only. Do not install Python solely to run it without user approval. If Python is unavailable, use the environment's existing text or code tools to enumerate the same code points and report their positions. If no code-point-aware inspection is possible, report the audit as inconclusive instead of claiming the text is clean.
+
+Treat a leading U+FEFF byte-order mark as informational. Treat U+200C and U+200D as context-sensitive because they may be required by joining scripts or emoji sequences. Do not infer AI authorship from any hidden character.
+
+An audit does not authorize editing. Remove characters only when the user requests cleanup and they are unintended. Preserve characters required for legitimate scripts, emoji sequences, or document semantics. Normalize ordinary prose to Unicode NFC only during an authorized cleanup.
 
 ### 3. Audit synthetic writing patterns
 Treat these as editing signals, never as proof of AI generation:
@@ -82,5 +93,5 @@ For normal document drafting/editing:
 For an explicit watermark audit:
 - report `hidden artifacts: found/none`
 - report `statistical watermark: detected/not detected/unknown`
-- briefly list what was changed
-- provide the cleaned text
+- list code points, locations, and context-sensitive findings
+- do not modify the source or provide a rewritten version unless cleanup was also requested
